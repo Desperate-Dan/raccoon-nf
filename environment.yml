@@ -1,0 +1,8 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::iqtree=3.0.1
+  - bioconda::jclusterfunk=0.0.25
+  - bioconda::mafft=7.525
+  - bioconda::raccoon=1.0.2

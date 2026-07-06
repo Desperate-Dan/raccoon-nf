@@ -1,9 +1,9 @@
 process seqQC {
     container "${params.container}@${params.container_sha}"
-    conda "${HOME}/miniconda3/envs/raccoon"
+    conda "${params.environment_file}"
 
-    publishDir "output/${input_ID}/seq-qc/", mode: "copy"
-    
+    publishDir { "${params.outdir}/${input_ID}/seq-qc/" }, mode: "copy"
+
     debug true
 
     input:
@@ -45,7 +45,8 @@ process seqQC {
     }
     if (params.custom_header_fields) {
         extra += " --header-fields '${params.custom_header_fields}'"
-    } else {
+    }
+    else {
         extra += " --header-fields '${params.header_fields}'"
     }
 
@@ -57,9 +58,9 @@ process seqQC {
 
 process mafftAlign {
     container "${params.container}@${params.container_sha}"
-    conda "${HOME}/miniconda3/envs/raccoon"
+    conda "${params.environment_file}"
 
-    publishDir "output/${input_ID}/mafft/", pattern: "*.aln.fasta", mode: "copy"
+    publishDir { "${params.outdir}/${input_ID}/mafft/" }, pattern: "*.aln.fasta", mode: "copy"
 
     input:
     tuple val(input_ID), path(qc_fasta)
@@ -75,13 +76,13 @@ process mafftAlign {
 
 process alnQC {
     container "${params.container}@${params.container_sha}"
-    conda "${HOME}/miniconda3/envs/raccoon"
+    conda "${params.environment_file}"
 
-    publishDir "output/${input_ID}/aln-qc/", mode: "copy"
-    
+    publishDir { "${params.outdir}/${input_ID}/aln-qc/" }, mode: "copy"
+
     input:
     tuple val(input_ID), path(aln_fasta)
-    
+
     output:
     tuple val(input_ID), path("mask_sites.csv"), emit: mask
     path "*"
@@ -91,7 +92,7 @@ process alnQC {
     extra = ""
     // Standardise n content thresholds between aln-qc and seq-qc
     extra += " --max-n-content ${params.max_n_content}"
-    
+
     if (params.cluster_window) {
         extra += " --cluster-window ${params.cluster_window}"
     }
@@ -113,7 +114,7 @@ process alnQC {
     if (params.flag_removal_threshold == true) {
         extra += " --flag-removal-threshold ${params.flag_removal_threshold}"
     }
-    
+
     """
     raccoon aln-qc ${aln_fasta} ${extra}
     """
